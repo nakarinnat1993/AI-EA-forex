@@ -1,0 +1,8 @@
+{
+  "_decision": "journal/DECISIONS.md 2026-09-15 — ปิดไม้ก่อนข่าว (ผู้ใช้เลือก ก)",
+  "_note": "ค่าคงที่จากเหตุผล ไม่ใช่พารามิเตอร์ให้ optimize — ถ้าจะเปลี่ยนต้องบันทึกเหตุผลใน DECISIONS และนับเป็น trial",
+  "currencies": ["USD"],
+  "min_importance": "high",
+  "minutes_before": 30,
+  "minutes_after": 30
+}

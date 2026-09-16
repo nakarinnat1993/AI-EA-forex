@@ -1,0 +1,32 @@
+{
+  "_source": "reference/XAUUSDc-exness-spec.md + วัดจากข้อมูลจริง 100,007 แท่ง M5 (journal/DATA-STATUS.md)",
+  "_measured": {
+    "min_spread_price": "$0.159 คือสเปรดต่ำสุดที่พบในข้อมูลจริง (p50 = $0.160) ใช้เป็นพื้นกันค่าว่าง/ศูนย์ — ต้นทุนจริงมาจากคอลัมน์ spread รายแท่ง",
+    "spread_validated": "ช่วง 2026-09-16 08:25-09:00 SpreadLogger วัดสดได้ $0.260 คงที่ และแท่ง M5 ช่วงเดียวกันบันทึก $0.260 ตรงกันทั้ง 8 แท่ง → คอลัมน์ spread เชื่อถือได้",
+    "swap_long_points": "-539.0 จาก MT5 2026-09-16 (เคยเป็น -534.9 วันที่ 09-14 → swap ลอยตัว)"
+  },
+  "_placeholders": {
+    "entry_slippage_price": "ประมาณการ",
+    "stop_slippage_price": "ประมาณการ — ความเสี่ยงจริงตอนข่าวคือราคากระโดดข้าม SL ไม่ใช่สเปรด (ANALYSIS-002: ทะลุ SL $12)",
+    "rollover_hour": "ยังไม่ยืนยันเวลาคิด swap ของ Exness — สมมติ 00:00 server (= 00:00 UTC)"
+  },
+  "symbol": {
+    "name": "XAUUSDc",
+    "digits": 3,
+    "contract_size": 1.0,
+    "volume_min": 0.01,
+    "volume_step": 0.01,
+    "volume_max": 200.0
+  },
+  "costs": {
+    "min_spread_price": 0.159,
+    "spread_multiplier": 1.0,
+    "entry_slippage_price": 0.02,
+    "stop_slippage_price": 0.10,
+    "commission_per_lot_roundturn": 0.0,
+    "swap_long_points": -539.0,
+    "swap_short_points": 0.0,
+    "swap_multipliers": {"0": 1, "1": 1, "2": 3, "3": 1, "4": 1},
+    "rollover_hour": 0
+  }
+}

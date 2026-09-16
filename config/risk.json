@@ -1,0 +1,7 @@
+{
+  "_decision": "journal/DECISIONS.md 2026-09-16 — ผู้ใช้ยืนยัน",
+  "_note": "ไม่ใช่พารามิเตอร์ให้ optimize — การไล่หาค่าความเสี่ยงที่ทำให้ backtest สวยที่สุดคือการ overfit ความเสี่ยง",
+  "initial_equity": 50.0,
+  "risk_pct": 1.0,
+  "daily_loss_limit_pct": 3.0
+}

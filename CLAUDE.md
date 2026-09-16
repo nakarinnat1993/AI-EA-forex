@@ -20,7 +20,9 @@
 
 → ทิศทาง: **ออกแบบกลยุทธ์ใหม่บนฐาน SMC** แล้วให้ EA รันอัตโนมัติเพื่อตัดอารมณ์ออก
 
-ยังไม่มีโค้ด production ใด ๆ ในโปรเจกต์ (มีแค่สคริปต์วิเคราะห์ใน `research/`)
+**Phase 1 (ฐานวิจัย) เริ่มแล้ว 2026-09-15** — backtester + cost model + ตัวกันกติกา overfitting
+และ MQL5 scripts สำหรับดึงข้อมูล พร้อมใช้ ยังไม่มีกลยุทธ์ (รอคุยนิยาม SMC กับผู้ใช้)
+และยังไม่มีข้อมูลราคาจริงในโปรเจกต์
 
 ## ข้อควรระวังที่สำคัญที่สุดของโปรเจกต์นี้
 
@@ -28,15 +30,53 @@ EA ตัดอารมณ์ออกจาก *การเข้าไม้
 โหมดพังที่พบบ่อยที่สุด: ปิด EA หลังขาดทุน, เข้าไม้มือแทรก, แก้พารามิเตอร์ระหว่าง drawdown
 → ต้องมีบัญชีแยกสำหรับ EA, magic number, และช่วงประเมินที่ตกลงไว้ล่วงหน้า
 
-## โครงสร้างที่วางไว้
+## โครงสร้าง
 
 ```
-data/raw/          ไฟล์ดิบจาก MT5 (ReportHistory-*.xlsx)
-research/          Python: features, strategy, backtest, walkforward
-reports/           ผลลัพธ์ backtest (JSON/HTML) ที่ Claude อ่านทุกรอบ
-ea/                MQL5 EA (port ตอนท้าย)
-journal/           บันทึกการตัดสินใจและการทดลอง
+config/
+  costs_exness_xauusdc.json   สเปก + ต้นทุน (spread/slippage ยังเป็น placeholder)
+  data_split.json             holdout_start — ตั้งครั้งเดียวเมื่อได้ข้อมูลชุดแรก
+  news_filter.json            ช่วงห้ามเทรดรอบข่าว USD High (ค่าคงที่ ไม่ optimize)
+data/raw/                     รายงานเทรดจาก MT5 (มีข้อมูลบัญชี — gitignored)
+data/mt5/                     ไฟล์ที่ MQL5 scripts ส่งออก (gitignored)
+ea/scripts/                   ExportBars.mq5, ExportSymbolSpec.mq5, ExportCalendar.mq5
+ea/experts/                   SpreadLogger.mq5 (บันทึกสเปรด ไม่เทรด)
+research/backtest/            engine, costs, sizing, metrics, report, causality, news
+research/smc/                 ตัวตรวจจับ SMC: swing, BOS/CHoCH, liquidity, sweep, order block
+research/data/                loader (ล็อก holdout), calendar, sync_mt5
+research/*.py                 สคริปต์วิเคราะห์ประวัติเทรด Phase 0 (stdlib ล้วน)
+reports/                      ผล backtest + runs.jsonl (นับ trial — ห้ามลบบรรทัด)
+journal/                      DECISIONS, ANALYSIS-*, ITERATIONS, HOLDOUT_LOG
+reference/                    สเปกโบรก
+tests/                        pytest
 ```
+
+## คำสั่ง
+
+```bash
+.venv/bin/python -m pytest              # รัน tests
+.venv/bin/python -m research.data.sync_mt5   # ดึงไฟล์ที่ MT5 export มาไว้ data/mt5/
+```
+
+## ข้อตกลงของ backtest engine (อย่าแก้โดยไม่บันทึกใน DECISIONS)
+
+- OHLC = ราคา bid, ask = bid + spread / Long ออกที่ bid, Short ออกที่ ask
+- signal แท่ง i → เข้าที่ open แท่ง i+1
+- แท่งเดียวชนทั้ง SL และ TP → นับเป็น SL (ติดธง ambiguous; ถ้าเกิน 5% ต้องเช็คด้วย M1)
+- เปิดแท่งทะลุ SL → ออกที่ open + stop slippage
+- ขนาดไม้ปัดลงเสมอ ต่ำกว่า min lot = ข้ามไม้ (ห้ามบังคับ min lot)
+- ทุกกลยุทธ์ต้องผ่าน `assert_causal` ก่อน backtest
+- news blackout (`config/news_filter.json`): ในช่วงข่าวห้ามเปิดไม้ และไม้ที่ถืออยู่ปิดที่ราคาเปิดของแท่งแรกในช่วง
+- limit order: Buy limit ถูกจับคู่เมื่อ **ask** ถึงราคาที่ตั้ง (low + spread ≤ entry) ตามที่ MT5 ทำจริง
+  ได้ราคาที่ตั้งไว้เสมอแม้แท่งจะ gap ข้ามไป / ยกเลิกเมื่อหมดอายุ, ราคาไปถึง TP ก่อน (ตกรถ),
+  ปิดเลย cancel_price หรือเข้าช่วงข่าว
+- ความเสี่ยง: `config/risk.json` (1%/ไม้, daily loss limit 3% — ผู้ใช้ยืนยันแล้ว ไม่ optimize)
+
+## MQL5 บน Mac
+
+ไฟล์ .mq5 ต้นฉบับอยู่ใน `ea/` และคัดลอกไปไว้ที่ `MQL5/Scripts/AI-EA/` กับ `MQL5/Experts/AI-EA/`
+ใน Wine prefix — การคอมไพล์ผ่าน command line ด้วย Wine ที่มากับแอปยังใช้ไม่ได้
+ให้คอมไพล์ใน MetaEditor (F7) แทน
 
 ## สถาปัตยกรรมที่ตกลงกันแล้ว
 
@@ -76,13 +116,15 @@ journal/           บันทึกการตัดสินใจและ�
 
 ## ข้อมูลที่ยังขาด
 
-- [ ] **ตัวเลขสเปรดจริงของ XAUUSDc** ← สำคัญที่สุดที่เหลือ
-- [ ] ความลึกของ history (XAUUSDc และ XAUUSD ย้อนไปถึงปีไหน)
-- [ ] ยืนยัน server timezone ช่วงฤดูหนาว
-- [ ] SMC: ผู้ใช้เรียนจากสำนักไหน นิยาม swing point/order block แบบใด
+- [ ] **ความลึกของ M5** — ได้ 17 เดือน (2025-04 →) ชนเพดาน 100,000 แท่ง ทั้งที่ H1/H4 ถึงปี 2017
+      → ต้องลองดึงเพิ่มหรือปรับแผน ดู `journal/DATA-STATUS.md`
+- [x] สเปรดจริง: p50 $0.160, p99 $0.360 — คอลัมน์ spread ในไฟล์แท่งตรงกับที่วัดสด ใช้ได้เลย
+- [x] server timezone: **UTC คงที่ทั้งปี ไม่ขยับตาม DST** (ยืนยัน 2026-09-16 จาก 140 ข่าว NFP)
+- [ ] ผู้ใช้ดูร่างกฎ `journal/STRATEGY-SMC-v0.md` (Claude เป็นคนออกแบบกฎ ไม่ใช่ผู้ใช้)
+- [ ] ยืนยันความเสี่ยง 1%/ไม้ และ daily loss limit 3%
 
 ## หมายเหตุสภาพแวดล้อม
 
-- Python 3.13.5 — **ยังไม่มี** pandas/openpyxl ติดตั้ง (สคริปต์วิเคราะห์ตอนนี้ใช้ stdlib ล้วน)
+- Python 3.13.5 + `.venv` (numpy 2.5.3, pandas 3.0.5, pytest 9.1.1 — ดู requirements.txt)
 - MT5 บน Mac เซฟไฟล์ลง Wine prefix ไม่ใช่ Desktop จริง:
   `~/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/users/user/Desktop/`

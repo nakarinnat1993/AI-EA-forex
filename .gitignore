@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.pytest_cache/
+
+# ข้อมูลดิบ: ไฟล์ใหญ่ และมีข้อมูลบัญชีส่วนตัว
+data/raw/
+data/mt5/
