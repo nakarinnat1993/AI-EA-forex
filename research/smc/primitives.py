@@ -147,11 +147,17 @@ def reference_levels(
 def sweeps(bars: pd.DataFrame, level: pd.Series, reclaim_bars: int, side: str) -> pd.DataFrame:
     """กวาด liquidity แล้วราคากลับเข้ามา
 
-    side="low"  : ราคาลงไปต่ำกว่า level แล้ว **ปิด** กลับขึ้นมาเหนือ level ภายใน reclaim_bars แท่ง
+    side="low"  : ราคามาจาก **เหนือ** level ทิ่มลงไปต่ำกว่า แล้ว **ปิด** กลับขึ้นมาเหนือ level
+                  ภายใน reclaim_bars แท่ง (ปิดกลับในแท่งเดียวกันก็นับ)
     side="high" : กลับด้าน
 
-    ยืนยันที่ "แท่งที่ปิดกลับเข้ามา" ไม่ใช่แท่งที่ทะลุ (ตอนทะลุยังไม่รู้ว่าจะกลับหรือไปต่อ)
-    ถ้าเกิน reclaim_bars แล้วยังไม่กลับ = ทะลุจริง ไม่ใช่ sweep → ทิ้ง
+    กฎที่กัน sweep ปลอม (พบจากการตรวจกราฟ IT-001):
+    - ต้องเข้าหา level จากฝั่งที่ liquidity รออยู่ คือแท่งก่อนหน้าปิดอยู่อีกฝั่งของ level
+      ราคาที่อยู่ใต้ level มานานแล้วค่อยไต่กลับขึ้นมา ไม่ใช่การกวาด stop
+    - liquidity ถูกเก็บได้ครั้งเดียว: หลัง sweep สำเร็จหรือทะลุจริง level นั้นถือว่าใช้แล้ว
+      จนกว่า level จะเปลี่ยนค่า (session หรือวันใหม่)
+
+    ยืนยันที่แท่งที่ปิดกลับเข้ามา / เกิน reclaim_bars แล้วยังไม่กลับ = ทะลุจริง ไม่ใช่ sweep
 
     คืน: confirmed (bool), sweep_level, sweep_extreme (จุดสุดของการกวาด), sweep_start_bar
     """
@@ -162,6 +168,7 @@ def sweeps(bars: pd.DataFrame, level: pd.Series, reclaim_bars: int, side: str) -
     low = bars["low"].to_numpy(float)
     close = bars["close"].to_numpy(float)
     levels = level.to_numpy(float)
+    below = side == "low"
 
     confirmed = np.zeros(n, dtype=bool)
     out_level = np.full(n, np.nan)
@@ -171,24 +178,36 @@ def sweeps(bars: pd.DataFrame, level: pd.Series, reclaim_bars: int, side: str) -
     active_start = -1
     active_level = np.nan
     active_extreme = np.nan
-    for i in range(n):
+    consumed_level = np.nan
+
+    def confirm(i: int) -> None:
+        confirmed[i] = True
+        out_level[i] = active_level
+        out_extreme[i] = active_extreme
+        out_start[i] = active_start
+
+    for i in range(1, n):
         if active_start < 0:
             lv = levels[i]
-            if np.isfinite(lv) and ((side == "low" and low[i] < lv) or (side == "high" and high[i] > lv)):
-                active_start = i
-                active_level = lv
-                active_extreme = low[i] if side == "low" else high[i]
-            continue
+            if not np.isfinite(lv) or (np.isfinite(consumed_level) and np.isclose(lv, consumed_level)):
+                continue
+            approached = close[i - 1] > lv if below else close[i - 1] < lv
+            pierced = low[i] < lv if below else high[i] > lv
+            if not (approached and pierced):
+                continue
+            active_start = i
+            active_level = lv
+            active_extreme = low[i] if below else high[i]
+        else:
+            active_extreme = min(active_extreme, low[i]) if below else max(active_extreme, high[i])
 
-        active_extreme = min(active_extreme, low[i]) if side == "low" else max(active_extreme, high[i])
-        reclaimed = close[i] > active_level if side == "low" else close[i] < active_level
+        reclaimed = close[i] > active_level if below else close[i] < active_level
         if reclaimed:
-            confirmed[i] = True
-            out_level[i] = active_level
-            out_extreme[i] = active_extreme
-            out_start[i] = active_start
+            confirm(i)
+            consumed_level = active_level
             active_start = -1
         elif i - active_start >= reclaim_bars:
+            consumed_level = active_level
             active_start = -1
 
     return pd.DataFrame(

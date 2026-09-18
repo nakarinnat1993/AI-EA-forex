@@ -1,0 +1,239 @@
+{
+  "run_id": "20260917-100204_smc_v0_5f0b8ca609aa",
+  "strategy": "smc_v0",
+  "params": {
+    "swing_len_h1": 5,
+    "swing_len_m5": 3,
+    "reclaim_bars": 3,
+    "choch_window": 24,
+    "order_expiry": 36,
+    "sl_buffer_atr": 0.1,
+    "tp_r": 2.0,
+    "session_start_hour": 7,
+    "session_end_hour": 16,
+    "asian_start_hour": 0,
+    "asian_end_hour": 7,
+    "min_sl_distance": 3.0,
+    "atr_period": 14
+  },
+  "data": {
+    "from": "2025-04-21 02:50:00",
+    "to": "2026-04-30 23:55:00",
+    "bars": 73002,
+    "symbol": "XAUUSDc M5"
+  },
+  "summary": {
+    "initial_equity": 50.0,
+    "final_equity": 48.71375785714265,
+    "return_pct": -2.5724842857146935,
+    "n_trades": 25,
+    "skipped_signals": {
+      "news_blackout": 10,
+      "missed_move": 20,
+      "order_already_pending": 1,
+      "position_open": 1
+    },
+    "warnings": [
+      "only 25 trades — too few to conclude anything"
+    ],
+    "win_rate": 0.36,
+    "profit_factor": 0.8223557825960205,
+    "expectancy_usd": -0.05144968571429434,
+    "expectancy_r": -0.11317671919999604,
+    "avg_win_r": 1.4914579090135784,
+    "avg_loss_r": -1.0157836975701315,
+    "total_pnl_usd": -1.2862421428573585,
+    "max_drawdown_pct": -6.973668496506269,
+    "sharpe_daily_annualized": -0.3535698540742135,
+    "avg_hold_minutes": 36.6,
+    "trades_per_active_day": 1.0416666666666667,
+    "ambiguous_exits": 0,
+    "costs_usd": {
+      "spread": 0.3899,
+      "slippage_and_gaps": 0.12080000000011006,
+      "swap": 0.0,
+      "commission": 0.0
+    },
+    "by_side": {
+      "long": {
+        "n": 13,
+        "pnl_usd": 1.5662559999998622,
+        "win_rate": 0.46153846153846156,
+        "expectancy_r": 0.26928853987416673
+      },
+      "short": {
+        "n": 12,
+        "pnl_usd": -2.8524981428572214,
+        "win_rate": 0.25,
+        "expectancy_r": -0.5275140831970058
+      }
+    },
+    "by_exit_reason": {
+      "news_close": {
+        "n": 3,
+        "pnl_usd": 0.6470699999999487,
+        "win_rate": 1.0,
+        "expectancy_r": 0.47437372704073516
+      },
+      "sl": {
+        "n": 16,
+        "pnl_usd": -7.240551714285889,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0157836975701315
+      },
+      "tp": {
+        "n": 6,
+        "pnl_usd": 5.307239571428581,
+        "win_rate": 1.0,
+        "expectancy_r": 2.0
+      }
+    },
+    "by_year": {
+      "2025": {
+        "n": 13,
+        "pnl_usd": -1.8897112142858123,
+        "win_rate": 0.3076923076923077,
+        "expectancy_r": -0.32692255806584014
+      },
+      "2026": {
+        "n": 12,
+        "pnl_usd": 0.6034690714284533,
+        "win_rate": 0.4166666666666667,
+        "expectancy_r": 0.11838127290466834
+      }
+    },
+    "by_month": {
+      "2025-04": {
+        "n": 3,
+        "pnl_usd": 0.09596757142853685,
+        "win_rate": 0.3333333333333333,
+        "expectancy_r": -0.007792959208873462
+      },
+      "2025-06": {
+        "n": 1,
+        "pnl_usd": -0.5095199999999976,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0303324435816266
+      },
+      "2025-07": {
+        "n": 2,
+        "pnl_usd": -0.3533817857143231,
+        "win_rate": 0.5,
+        "expectancy_r": -0.35607939086250073
+      },
+      "2025-08": {
+        "n": 1,
+        "pnl_usd": -0.4575233571428498,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0200658446358797
+      },
+      "2025-11": {
+        "n": 4,
+        "pnl_usd": -1.0574976428571337,
+        "win_rate": 0.25,
+        "expectancy_r": -0.6092209276764782
+      },
+      "2025-12": {
+        "n": 2,
+        "pnl_usd": 0.39224399999995513,
+        "win_rate": 0.5,
+        "expectancy_r": 0.4864132017095594
+      },
+      "2026-01": {
+        "n": 2,
+        "pnl_usd": -0.20833900000007818,
+        "win_rate": 0.5,
+        "expectancy_r": -0.2581968484680879
+      },
+      "2026-03": {
+        "n": 4,
+        "pnl_usd": 0.8013261428572149,
+        "win_rate": 0.5,
+        "expectancy_r": 0.4955456228431383
+      },
+      "2026-04": {
+        "n": 6,
+        "pnl_usd": 0.010481928571316579,
+        "win_rate": 0.3333333333333333,
+        "expectancy_r": -0.0075355865967263
+      }
+    }
+  },
+  "extra": {
+    "random_baseline": {
+      "runs": 50,
+      "expectancy_r": {
+        "smc": -0.11317671919999604,
+        "random_median": -0.015363530162507043,
+        "random_p05": -0.4645846016603189,
+        "random_p95": 0.47869820808670477,
+        "share_random_at_least_as_good": 0.58
+      },
+      "profit_factor": {
+        "smc": 0.8223557825960205,
+        "random_median": 0.9602440619253241,
+        "random_p05": 0.43088807925646244,
+        "random_p95": 2.000578022228545,
+        "share_random_at_least_as_good": 0.58
+      },
+      "win_rate": {
+        "smc": 0.36,
+        "random_median": 0.3509852216748769,
+        "random_p05": 0.18518518518518517,
+        "random_p95": 0.5347826086956521,
+        "share_random_at_least_as_good": 0.48
+      },
+      "return_pct": {
+        "smc": -2.5724842857146935,
+        "random_median": -0.6666334285714337,
+        "random_p05": -10.651570428571475,
+        "random_p95": 11.963895828570607,
+        "share_random_at_least_as_good": 0.58
+      },
+      "random_n_trades_median": 27.0
+    },
+    "quarterly_folds": [
+      {
+        "quarter": "2025-Q2",
+        "n": 4,
+        "expectancy_r": -0.26342783030206174,
+        "win_rate": 0.25,
+        "pnl_usd": -0.4135524285714608
+      },
+      {
+        "quarter": "2025-Q3",
+        "n": 3,
+        "expectancy_r": -0.5774082087869604,
+        "win_rate": 0.3333333333333333,
+        "pnl_usd": -0.810905142857173
+      },
+      {
+        "quarter": "2025-Q4",
+        "n": 6,
+        "expectancy_r": -0.24400955121446563,
+        "win_rate": 0.3333333333333333,
+        "pnl_usd": -0.6652536428571786
+      },
+      {
+        "quarter": "2026-Q1",
+        "n": 6,
+        "expectancy_r": 0.2442981324060629,
+        "win_rate": 0.5,
+        "pnl_usd": 0.5929871428571368
+      },
+      {
+        "quarter": "2026-Q2",
+        "n": 6,
+        "expectancy_r": -0.0075355865967263,
+        "win_rate": 0.3333333333333333,
+        "pnl_usd": 0.010481928571316579
+      }
+    ],
+    "setup_funnel": {
+      "no_order_block": 104,
+      "signal": 57,
+      "price_inside_zone": 52,
+      "sl_too_tight": 38
+    }
+  }
+}

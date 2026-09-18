@@ -32,6 +32,7 @@ def write_report(
     params: dict,
     data_info: dict,
     out_dir: Path = DEFAULT_REPORTS_DIR,
+    extra: dict | None = None,
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"{datetime.now():%Y%m%d-%H%M%S}_{strategy}_{params_hash(params)}"
@@ -43,6 +44,8 @@ def write_report(
         "data": data_info,
         "summary": summary,
     }
+    if extra:
+        report["extra"] = extra
     report_path = out_dir / f"{run_id}.json"
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
 

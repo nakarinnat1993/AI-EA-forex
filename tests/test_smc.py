@@ -99,6 +99,31 @@ def test_real_breakdown_is_not_a_sweep():
     assert not sweeps(bars, level, reclaim_bars=2, side="low")["confirmed"].any()
 
 
+def test_price_already_below_the_level_climbing_back_is_not_a_sweep():
+    # IT-001 กราฟ 3: ราคาอยู่ใต้ Asian low มาหลายชั่วโมง แล้วค่อยปิดกลับขึ้นมา
+    bars = make_bars([
+        ("2026-09-14 10:00", 99.0, 99.4, 98.8, 99.0),
+        ("2026-09-14 10:05", 99.0, 99.5, 98.5, 99.2),
+        ("2026-09-14 10:10", 99.2, 100.8, 99.1, 100.5),
+    ])
+    level = pd.Series(100.0, index=bars.index)
+    assert not sweeps(bars, level, reclaim_bars=3, side="low")["confirmed"].any()
+
+
+def test_liquidity_can_only_be_swept_once_per_level():
+    bars = make_bars([
+        ("2026-09-14 10:00", 101.0, 101.5, 100.5, 101.0),
+        ("2026-09-14 10:05", 101.0, 101.2, 99.0, 100.5),  # ทิ่มลงแล้วปิดกลับในแท่งเดียว → sweep
+        ("2026-09-14 10:10", 100.5, 101.3, 100.4, 101.0),
+        ("2026-09-14 10:15", 101.0, 101.1, 99.2, 100.6),  # level เดิมถูกเก็บไปแล้ว → ไม่นับซ้ำ
+    ])
+    level = pd.Series(100.0, index=bars.index)
+    result = sweeps(bars, level, reclaim_bars=3, side="low")
+
+    assert result["confirmed"].tolist() == [False, True, False, False]
+    assert result["sweep_extreme"].iloc[1] == pytest.approx(99.0)
+
+
 def test_order_block_is_the_last_opposite_candle_before_the_move():
     bars = pd.DataFrame(
         {
