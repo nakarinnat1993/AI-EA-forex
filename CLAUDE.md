@@ -23,9 +23,14 @@
 **Phase 1 (ฐานวิจัย) พร้อมใช้** — backtester, cost model จากข้อมูลจริง, ตัวกันกติกา overfitting,
 ข้อมูล XAUUSDc (M5 17 เดือน, H1/H4 ถึง 2017), ปฏิทินข่าว, holdout ตั้งแล้วที่ 2026-05-01
 
-**SMC v0 รันแล้ว (IT-001, 2026-09-17)** — กฎออกแบบโดย Claude จาก SMC ทั่วไป
-ผล: 25 ไม้, −0.11R, **ไม่ชนะการเข้าไม้สุ่ม** และไม้น้อยเกินสรุป → ขั้นต่อไปคือให้ผู้ใช้ตรวจ setup
-ด้วยตาบน TradingView ก่อนเปลี่ยนกฎใด ๆ ดู `journal/ITERATIONS.md`
+**ทดสอบกลยุทธ์ครบแล้ว (2026-09-18): ไม่มีตัวไหนผ่าน** — 13 trial บนข้อมูล Dukascopy 2017 → 2026-04
+(SMC กลับตัว 4 แบบ, Asian breakout, trend pullback เทรนด์ H1 และ M15)
+ใกล้ที่สุด: pullback เทรนด์ M15 เข้า M5 (+0.20R ชนะการสุ่มทุกรอบ) แต่กำไร 94% มาจากปี 2025 และไม่มีไม้
+4 ปี → ไม่ผ่านเกณฑ์ความสม่ำเสมอ (IT-009)
+**ยังไม่มี EA ที่ควรรันด้วยเงินจริง** holdout ยังไม่ถูกเปิด ดู `journal/ITERATIONS.md` และ DECISIONS 2026-09-18
+
+ข้อมูล Dukascopy: `.venv/bin/python -m research.data.dukascopy 2017-01-01 <วันที่>` (M5/M15/H1, cache ใน data/dukascopy/raw)
+pandas 3: คอลัมน์ข้อความเก็บค่าว่างเป็น NaN — ใช้ `structure["is_break"]` ห้ามเช็ค `event is not None`
 
 รันการทดลอง: `.venv/bin/python -m research.experiments.compare_random --strategy smc_v0.1 --source dukascopy`
 (กลยุทธ์ที่มี: `smc_v0.1`, `asian_breakout_v0` / แหล่งข้อมูล: `dukascopy` 2017 →, `exness` 17 เดือน)

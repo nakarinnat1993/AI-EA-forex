@@ -31,9 +31,12 @@ from research.strategies import REGISTRY, random_matched_signals
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG = REPO_ROOT / "config"
 CALENDAR = REPO_ROOT / "data" / "mt5" / "calendar.csv"
-SOURCES = {
-    "exness": (REPO_ROOT / "data" / "mt5" / "XAUUSDc_M5.csv", REPO_ROOT / "data" / "mt5" / "XAUUSDc_H1.csv"),
-    "dukascopy": (REPO_ROOT / "data" / "dukascopy" / "XAUUSD_M5.csv", REPO_ROOT / "data" / "dukascopy" / "XAUUSD_H1.csv"),
+DATA_FILES = {
+    "exness": {
+        "M5": REPO_ROOT / "data" / "mt5" / "XAUUSDc_M5.csv",
+        "H1": REPO_ROOT / "data" / "mt5" / "XAUUSDc_H1.csv",
+    },
+    "dukascopy": {tf: REPO_ROOT / "data" / "dukascopy" / f"XAUUSD_{tf}.csv" for tf in ("M1", "M5", "M15", "H1")},
 }
 RANDOM_RUNS = 50
 THAI_OFFSET = pd.Timedelta(hours=7)  # server Exness และ Dukascopy = UTC
@@ -50,20 +53,30 @@ MAX_DRAWDOWN_PCT = 25.0
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--strategy", choices=sorted(REGISTRY), required=True)
-    parser.add_argument("--source", choices=sorted(SOURCES), default="dukascopy")
+    parser.add_argument("--source", choices=sorted(DATA_FILES), default="dukascopy")
+    parser.add_argument("--timeframe", default="M5", help="timeframe ที่ใช้เข้าไม้")
+    parser.add_argument("--bias-tf", default="H1", help="timeframe ที่ใช้ดูเทรนด์")
     args = parser.parse_args()
+    files = DATA_FILES[args.source]
+    for tf in (args.timeframe, args.bias_tf):
+        if tf not in files:
+            raise SystemExit(f"no {tf} data for {args.source} (มี {sorted(files)})")
 
-    generate, params_class, hours_of = REGISTRY[args.strategy]
-    params = params_class()
+    generate, params, hours_of = REGISTRY[args.strategy]
     session_start, session_end = hours_of(params)
+    # ชื่อที่ใช้นับ trial — timeframe อื่นนับเป็นคนละ trial
+    if args.timeframe == "M5" and args.bias_tf == "H1":
+        label = args.strategy
+    else:
+        label = f"{args.strategy}@{args.timeframe}" + (f"/bias{args.bias_tf}" if args.bias_tf != "H1" else "")
 
-    m5_path, h1_path = SOURCES[args.source]
+    m5_path, h1_path = files[args.timeframe], files[args.bias_tf]
     m5 = load_research_bars(m5_path)
     h1 = load_research_bars(h1_path)
     spec, costs = load_cost_config(CONFIG / "costs_exness_xauusdc.json")
     risk = load_risk_config(CONFIG / "risk.json")
     blackout = blackout_for_bars(m5.index, CALENDAR)
-    print(f"{args.strategy} | source={args.source} | dev: {m5.index[0]} → {m5.index[-1]}  ({len(m5):,} แท่ง M5)", flush=True)
+    print(f"{label} | source={args.source} | dev: {m5.index[0]} → {m5.index[-1]}  ({len(m5):,} แท่ง {args.timeframe})", flush=True)
 
     print("ตรวจ look-ahead ...", flush=True)
     assert_causal(lambda frame: generate(frame, h1, params)[0], m5, n_checks=3, min_bars=20_000)
@@ -95,9 +108,9 @@ def main() -> None:
     report_path = write_report(
         result,
         summary,
-        strategy=args.strategy,
+        strategy=label,
         params=params.as_dict(),
-        data_info={"source": args.source, "from": str(m5.index[0]), "to": str(m5.index[-1]), "bars": len(m5)},
+        data_info={"source": args.source, "timeframe": args.timeframe, "from": str(m5.index[0]), "to": str(m5.index[-1]), "bars": len(m5)},
         extra={"random_baseline": comparison, "yearly_folds": folds, "setup_funnel": funnel, "verdict": verdict},
     )
     if len(setups):

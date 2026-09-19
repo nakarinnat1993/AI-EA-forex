@@ -44,6 +44,16 @@ def test_structure_marks_bos_then_choch():
     assert structure["trend"].iloc[-1] == -1
 
 
+def test_non_break_bars_are_marked_explicitly():
+    # บั๊ก 2026-09-18: pandas 3 เก็บค่าว่างของคอลัมน์ข้อความเป็น NaN → `event is not None` จริงทุกแท่ง
+    closes = [10, 11, 14, 11, 10, 11, 16, 13, 12, 11, 10, 8, 7]
+    bars = bars_from_closes(closes, wick=0.0)
+    structure = market_structure(bars, swing_points(bars, length=2))
+
+    assert structure["is_break"].sum() == structure["event"].notna().sum()
+    assert all(e is None for e in structure.loc[~structure["is_break"], "event"])
+
+
 def test_structure_ignores_wick_only_breaks():
     closes = [10, 11, 14, 11, 10, 11, 12, 12]
     bars = bars_from_closes(closes, wick=0.0)

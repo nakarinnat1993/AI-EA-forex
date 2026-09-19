@@ -41,5 +41,8 @@ def test_every_report_is_counted_as_a_trial(tmp_path):
         write_report(result, summary, "demo", params, {"from": "2026-09-14", "to": "2026-09-15"}, out_dir=tmp_path)
 
     assert count_trials("demo", out_dir=tmp_path) == 2
+
+    write_report(result, summary, "demo@M1/biasM15", {"lookback": 5}, {}, out_dir=tmp_path)
+    assert count_trials("demo@M1/biasM15", out_dir=tmp_path) == 1
     assert count_trials("other", out_dir=tmp_path) == 0
-    assert len(list(tmp_path.glob("*_trades.csv"))) == 2
+    assert len(list(tmp_path.glob("*_trades.csv"))) == 3

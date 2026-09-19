@@ -72,7 +72,9 @@ def market_structure(bars: pd.DataFrame, swings: pd.DataFrame) -> pd.DataFrame:
     CHoCH = ทะลุสวนเทรนด์ปัจจุบัน (แท่งแรกที่กลับทิศ)
     swing เดิมที่ถูกทะลุไปแล้วจะไม่ถูกนับซ้ำ จนกว่าจะมี swing ใหม่ยืนยัน
 
-    คืน: trend (1/-1/0), event ('bos'/'choch'/None), level (ราคาที่ถูกทะลุ)
+    คืน: trend (1/-1/0), event ('bos'/'choch'/None), level (ราคาที่ถูกทะลุ),
+         is_break (bool) — **ใช้คอลัมน์นี้เช็คว่าแท่งไหนทะลุ** อย่าเช็ค `event is not None`
+         เพราะ pandas 3 เก็บค่าว่างของคอลัมน์ข้อความเป็น NaN ไม่ใช่ None (บั๊กที่เจอ 2026-09-18)
     """
     n = len(bars)
     close = bars["close"].to_numpy(float)
@@ -101,7 +103,15 @@ def market_structure(bars: pd.DataFrame, swings: pd.DataFrame) -> pd.DataFrame:
             current = -1
         trend[i] = current
 
-    return pd.DataFrame({"trend": trend, "event": event, "level": level}, index=bars.index)
+    return pd.DataFrame(
+        {
+            "trend": trend,
+            "event": pd.Series(event, index=bars.index, dtype=object),
+            "level": level,
+            "is_break": np.isfinite(level),
+        },
+        index=bars.index,
+    )
 
 
 def reference_levels(

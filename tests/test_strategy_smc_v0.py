@@ -59,6 +59,22 @@ def test_emits_signals_that_follow_the_written_rules(market):
         assert match.any()
 
 
+def test_bias_from_m15_waits_for_the_m15_bar_to_close():
+    from research.strategies.smc_v0 import h1_bias
+
+    # โครงสร้าง M15 ทะลุขึ้นที่แท่ง 6 (09-14 01:30) ซึ่งปิดตอน 01:45
+    closes = [10, 11, 14, 11, 10, 11, 16, 17]
+    m15_index = pd.date_range("2026-09-14 00:00", periods=len(closes), freq="15min")
+    c = np.asarray(closes, dtype=float)
+    m15 = pd.DataFrame({"open": c, "high": c, "low": c, "close": c}, index=m15_index)
+    m5_index = pd.date_range("2026-09-14 01:30", periods=4, freq="5min")
+
+    bias = h1_bias(m5_index, m15, swing_len=2)
+
+    # แท่ง M5 01:30 และ 01:35 ปิดก่อน 01:45 → ยังไม่รู้ / แท่ง 01:40 ปิดตอน 01:45 → รู้แล้ว
+    assert bias.tolist() == [0, 0, 1, 1]
+
+
 def test_strategy_never_looks_ahead(market):
     m5, h1, _, _ = market
     assert_causal(lambda frame: generate_signals(frame, h1, PARAMS)[0], m5, n_checks=3, min_bars=2000)

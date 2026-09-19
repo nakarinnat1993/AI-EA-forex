@@ -12,8 +12,10 @@
 v0 → v0.1 (IT-002): แก้ sweep ปลอม (ต้องเข้าหา level จากอีกฝั่ง, liquidity เก็บได้ครั้งเดียว) และ
 ย้ายช่วงค้นหา OB ให้ตรงกับตารางนิยาม — v0 ค้นระหว่างจุดต่ำสุดกับแท่งที่ทะลุ ทำให้หา OB ไม่เจอ 41%
 
+variant ที่ลงทะเบียนไว้ล่วงหน้า (STRATEGY-SMC-v0.md) เปิดผ่านสวิตช์ใน SmcV0Params — ค่าเริ่มต้น = v0.1
+
 หมายเหตุการตีความ: ข้อ 3 รับการทะลุทั้งแบบ CHoCH และ BOS ของโครงสร้าง M5
-(ตามที่เอกสารกฎเขียนว่า "ปิดทะลุ swing high ล่าสุด") — แบบรับเฉพาะ CHoCH เก็บไว้เป็น variant
+(ตามที่เอกสารกฎเขียนว่า "ปิดทะลุ swing high ล่าสุด") — variant 2 รับเฉพาะ CHoCH
 """
 
 from __future__ import annotations
@@ -57,6 +59,10 @@ class SmcV0Params:
     asian_end_hour: int = 7
     min_sl_distance: float = 3.0
     atr_period: int = 14
+    # สวิตช์ variant ที่ลงทะเบียนไว้ล่วงหน้า (2026-09-17) — ค่าเริ่มต้นคือ v0.1
+    sl_anchor: str = "block"  # variant 1: "sweep" = SL ใต้จุดสุดของการกวาด
+    require_choch: bool = False  # variant 2: รับเฉพาะ CHoCH ไม่รับ BOS
+    min_sweep_depth_atr: float = 0.0  # variant 3: ทิ่มเกินระดับอย่างน้อยกี่เท่าของ ATR
 
     def as_dict(self) -> dict:
         return {f.name: getattr(self, f.name) for f in fields(self)}
@@ -81,6 +87,7 @@ def generate_signals(
     }
     structure = market_structure(m5, swing_points(m5, params.swing_len_m5))
     event = structure["event"].to_numpy()
+    is_break = structure["is_break"].to_numpy()
     trend = structure["trend"].to_numpy()
     atr = average_true_range(m5, params.atr_period)
 
@@ -97,14 +104,19 @@ def generate_signals(
 
     for j in range(n):
         for direction, sweep in sweep_by_direction.items():
-            if sweep["confirmed"][j] and in_session[j] and bias[j] == direction:
-                armed[direction] = {
-                    "sweep_bar": j,
-                    "start": int(sweep["start"][j]),
-                    "extreme": float(sweep["extreme"][j]),
-                    "source": sweep["source"][j],
-                    "until": j + params.choch_window,
-                }
+            if not (sweep["confirmed"][j] and in_session[j] and bias[j] == direction):
+                continue
+            if params.min_sweep_depth_atr > 0 and not (
+                np.isfinite(atr[j]) and sweep["depth"][j] >= params.min_sweep_depth_atr * atr[j]
+            ):
+                continue
+            armed[direction] = {
+                "sweep_bar": j,
+                "start": int(sweep["start"][j]),
+                "extreme": float(sweep["extreme"][j]),
+                "source": sweep["source"][j],
+                "until": j + params.choch_window,
+            }
 
         for direction in (1, -1):
             setup = armed[direction]
@@ -113,12 +125,15 @@ def generate_signals(
             if j > setup["until"]:
                 armed[direction] = None
                 continue
-            if not (in_session[j] and event[j] is not None and trend[j] == direction):
+            if not (in_session[j] and is_break[j] and trend[j] == direction):
+                continue
+            if params.require_choch and event[j] != "choch":
                 continue
             armed[direction] = None
 
             window = slice(setup["start"], j + 1)
             extreme_bar = setup["start"] + int(np.argmin(low[window]) if direction == 1 else np.argmax(high[window]))
+            extreme_price = low[extreme_bar] if direction == 1 else high[extreme_bar]
             # OB = แท่งสีตรงข้ามแท่งสุดท้าย ที่หรือก่อนจุดสุดของการกวาด (ต้นทางของแรงกลับตัว)
             block = find_order_block(m5, max(0, extreme_bar - params.choch_window), extreme_bar, direction)
             record = {
@@ -135,7 +150,7 @@ def generate_signals(
                 "tp": np.nan,
             }
 
-            outcome = _order_levels(block, used_blocks, atr[j], close[j], direction, params)
+            outcome = _order_levels(block, used_blocks, atr[j], close[j], extreme_price, direction, params)
             if isinstance(outcome, str):
                 record["outcome"] = outcome
             elif side[j] != 0:
@@ -156,7 +171,7 @@ def generate_signals(
     return signals, pd.DataFrame(setups)
 
 
-def _order_levels(block, used_blocks, atr_now, close_now, direction, params) -> dict | str:
+def _order_levels(block, used_blocks, atr_now, close_now, extreme_price, direction, params) -> dict | str:
     if block is None:
         return "no_order_block"
     if block["bar"] in used_blocks:
@@ -164,17 +179,20 @@ def _order_levels(block, used_blocks, atr_now, close_now, direction, params) -> 
     if not np.isfinite(atr_now):
         return "atr_not_ready"
     buffer = params.sl_buffer_atr * atr_now
+    by_sweep = params.sl_anchor == "sweep"
     if direction == 1:
         entry = block["top"]
         cancel = block["bottom"]
-        sl = cancel - buffer
+        anchor = min(cancel, extreme_price) if by_sweep else cancel
+        sl = anchor - buffer
         risk = entry - sl
         tp = entry + params.tp_r * risk
         waiting_for_pullback = close_now > entry
     else:
         entry = block["bottom"]
         cancel = block["top"]
-        sl = cancel + buffer
+        anchor = max(cancel, extreme_price) if by_sweep else cancel
+        sl = anchor + buffer
         risk = sl - entry
         tp = entry - params.tp_r * risk
         waiting_for_pullback = close_now < entry
@@ -185,11 +203,18 @@ def _order_levels(block, used_blocks, atr_now, close_now, direction, params) -> 
     return {"entry": entry, "sl": sl, "tp": tp, "cancel": cancel}
 
 
+def bar_duration(index: pd.DatetimeIndex) -> pd.Timedelta:
+    """ความยาวแท่ง = ระยะห่างที่พบบ่อยที่สุด (ช่องว่างสุดสัปดาห์และวันหยุดไม่กระทบ)"""
+    if len(index) < 2:
+        return _M5
+    return pd.Series(index[1:] - index[:-1]).mode().iloc[0]
+
+
 def h1_bias(m5_index: pd.DatetimeIndex, h1: pd.DataFrame, swing_len: int) -> np.ndarray:
-    """ทิศทาง H1 ณ เวลาที่แท่ง M5 ปิด — ใช้เฉพาะแท่ง H1 ที่ปิดไปแล้ว"""
+    """ทิศทางของ timeframe ใหญ่ (H1 หรือ M15) ณ เวลาที่แท่งเข้าไม้ปิด — ใช้เฉพาะแท่งที่ปิดไปแล้ว"""
     structure = market_structure(h1, swing_points(h1, swing_len))
-    available = pd.DataFrame({"at": h1.index + _H1, "trend": structure["trend"].to_numpy()})
-    decisions = pd.DataFrame({"at": m5_index + _M5})
+    available = pd.DataFrame({"at": h1.index + bar_duration(h1.index), "trend": structure["trend"].to_numpy()})
+    decisions = pd.DataFrame({"at": m5_index + bar_duration(m5_index)})
     merged = pd.merge_asof(decisions, available, on="at", direction="backward")
     return merged["trend"].fillna(0).astype(np.int64).to_numpy()
 
@@ -213,10 +238,15 @@ def _combined_sweeps(m5: pd.DataFrame, levels: pd.DataFrame, reclaim_bars: int, 
     a = first["confirmed"].to_numpy()
     b = second["confirmed"].to_numpy()
     pick = np.fmin if side == "low" else np.fmax
+    sign = 1.0 if side == "low" else -1.0
     never = np.iinfo(np.int64).max
+    # ความลึกของการทิ่มเกินระดับ (บวกเสมอ)
+    depth_a = (first["sweep_level"].to_numpy() - first["sweep_extreme"].to_numpy()) * sign
+    depth_b = (second["sweep_level"].to_numpy() - second["sweep_extreme"].to_numpy()) * sign
     return {
         "confirmed": a | b,
         "extreme": pick(first["sweep_extreme"].to_numpy(), second["sweep_extreme"].to_numpy()),
+        "depth": np.fmax(depth_a, depth_b),
         "start": np.minimum(
             np.where(a, first["sweep_start_bar"].to_numpy(), never),
             np.where(b, second["sweep_start_bar"].to_numpy(), never),

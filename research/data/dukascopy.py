@@ -183,7 +183,7 @@ def main() -> None:
     print(f"M1: {len(m1):,} แท่ง  {m1.index[0]} → {m1.index[-1]}", flush=True)
 
     spread = exness_hourly_spread_points()
-    for rule, name in (("5min", "M5"), ("1h", "H1")):
+    for rule, name in (("1min", "M1"), ("5min", "M5"), ("15min", "M15"), ("1h", "H1")):
         bars = resample(m1, rule)
         path = write_export(bars, name, spread)
         print(f"{name}: {len(bars):,} แท่ง → {path}", flush=True)

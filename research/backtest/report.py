@@ -35,7 +35,8 @@ def write_report(
     extra: dict | None = None,
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
-    run_id = f"{datetime.now():%Y%m%d-%H%M%S}_{strategy}_{params_hash(params)}"
+    # ชื่อกลยุทธ์อาจมี "/" (เช่น pullback_v0@M5/biasM15) ซึ่งใช้เป็นชื่อไฟล์ไม่ได้
+    run_id = f"{datetime.now():%Y%m%d-%H%M%S}_{strategy.replace('/', '_')}_{params_hash(params)}"
 
     report = {
         "run_id": run_id,

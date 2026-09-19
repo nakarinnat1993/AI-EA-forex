@@ -2,7 +2,7 @@
 
 ทุก signal ของกลยุทธ์อ้างอิง → signal สุ่มหนึ่งอัน ที่
 - เกิดที่แท่งสุ่มในช่วงเวลาเทรดเดียวกัน ทิศสุ่ม
-- ระยะ SL, ระยะ TP และ (ถ้าเป็นคำสั่งรอ) ระยะรอย่อ, ระยะ cancel, อายุคำสั่ง **เท่าเดิมทุกอย่าง**
+- ระยะ SL, TP, TP2 และ (ถ้าเป็นคำสั่งรอ) ระยะรอย่อ, ระยะ cancel, อายุคำสั่ง **เท่าเดิมทุกอย่าง**
   คำสั่ง market วัดระยะจากราคาปิดของแท่ง signal / คำสั่งรอวัดจากราคาที่รอเข้า
 
 ต่างจากกลยุทธ์อ้างอิงแค่ "เข้าตรงไหน" อย่างเดียว ถ้ากลยุทธ์ชนะคู่เทียบนี้ไม่ขาด
@@ -32,9 +32,11 @@ def random_matched_signals(
     entry = np.full(n, np.nan)
     sl = np.full(n, np.nan)
     tp = np.full(n, np.nan)
+    tp2 = np.full(n, np.nan)
     expiry = np.full(n, np.nan)
     cancel = np.full(n, np.nan)
 
+    ref_tp2 = reference["tp2"] if "tp2" in reference else pd.Series(np.nan, index=reference.index)
     ref_positions = np.flatnonzero(reference["side"].to_numpy() != 0)
     if len(ref_positions) > len(eligible):
         raise ValueError("more reference signals than eligible bars")
@@ -46,6 +48,7 @@ def random_matched_signals(
         anchor = row["entry"] if is_limit else close[pos]
         sl_distance = (anchor - row["sl"]) * ref_side
         tp_distance = (row["tp"] - anchor) * ref_side
+        tp2_distance = (ref_tp2.iloc[pos] - anchor) * ref_side
 
         k = int(rng.choice(eligible))
         while side[k] != 0:
@@ -64,8 +67,17 @@ def random_matched_signals(
             new_anchor = close[k]
         sl[k] = new_anchor - s * sl_distance
         tp[k] = new_anchor + s * tp_distance
+        tp2[k] = new_anchor + s * tp2_distance
 
     return pd.DataFrame(
-        {"side": side, "entry": entry, "sl": sl, "tp": tp, "expiry_bars": expiry, "cancel_price": cancel},
+        {
+            "side": side,
+            "entry": entry,
+            "sl": sl,
+            "tp": tp,
+            "tp2": tp2,
+            "expiry_bars": expiry,
+            "cancel_price": cancel,
+        },
         index=bars.index,
     )
