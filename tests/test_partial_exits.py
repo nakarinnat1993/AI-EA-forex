@@ -71,6 +71,20 @@ def test_position_too_small_to_split_exits_fully_at_tp1():
     assert result.skipped["too_small_to_split"] == 1
 
 
+def test_breakeven_moves_stop_to_entry_after_tp1():
+    bars = make_bars(ENTRY_ROWS + [
+        ("2026-09-16 10:10", 100.2, 110.5, 100.0, 110.0),  # TP1 ปิดครึ่งแรก
+        ("2026-09-16 10:15", 110.0, 110.2, 94.0, 95.0),  # ย้อนลงมา — SL อยู่ที่ราคาเข้าแล้ว
+    ])
+    signals = split_signal(bars, "2026-09-16 10:00", 1, 95.0, 110.0, 120.0)
+    risk = RiskConfig(initial_equity=50.0, risk_pct=1.0, breakeven_after_tp1=True)
+    (trade,) = run_backtest(bars, signals, CENT_SPEC, NO_COSTS, risk).trades
+
+    assert trade.exit_reason == "sl"
+    assert trade.exit_price == pytest.approx(100.2)  # ราคาเข้า ไม่ใช่ 95
+    assert trade.pnl_usd == pytest.approx((110.0 - 100.2) * 0.04)
+
+
 def test_short_partial_uses_ask_prices():
     bars = make_bars([
         ("2026-09-16 10:00", 100.0, 100.5, 99.5, 100.0),

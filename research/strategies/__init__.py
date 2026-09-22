@@ -1,5 +1,6 @@
-from . import asian_breakout, pullback, smc_v0
+from . import asian_breakout, fvg, pullback, smc_v0
 from .asian_breakout import AsianBreakoutParams
+from .fvg import FvgParams
 from .pullback import PullbackParams
 from .random_matched import random_matched_signals
 from .smc_v0 import SIGNAL_COLUMNS, STRATEGY_NAME, TUNABLE_PARAMS, SmcV0Params, generate_signals
@@ -25,6 +26,17 @@ REGISTRY = {
     pullback.STRATEGY_NAME: (
         pullback.generate_signals,
         PullbackParams(),
+        lambda p: (p.session_start_hour, p.session_end_hour),
+    ),
+    # รอบที่ 3 — ผู้ใช้ขอ (DECISIONS 2026-09-19, STRATEGY-ROUND3.md)
+    "pullback_v0_volfilter": (
+        pullback.generate_signals,
+        PullbackParams(vol_filter=True),
+        lambda p: (p.session_start_hour, p.session_end_hour),
+    ),
+    fvg.STRATEGY_NAME: (
+        fvg.generate_signals,
+        FvgParams(),
         lambda p: (p.session_start_hour, p.session_end_hour),
     ),
 }

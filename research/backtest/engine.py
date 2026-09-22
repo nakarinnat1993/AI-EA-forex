@@ -48,6 +48,8 @@ class RiskConfig:
     risk_pct: float
     # circuit breaker: ขาดทุนสะสมในวันเกิน % ของทุนต้นวัน → หยุดเปิดไม้ใหม่ถึงวันถัดไป
     daily_loss_limit_pct: float | None = None
+    # เลื่อน SL มาที่ราคาเข้าหลังปิดครึ่งแรกที่ TP1 (FORWARD-TEST-PLAN 2026-09-21)
+    breakeven_after_tp1: bool = False
 
 
 def load_risk_config(path: str | Path) -> RiskConfig:
@@ -56,6 +58,7 @@ def load_risk_config(path: str | Path) -> RiskConfig:
         initial_equity=raw["initial_equity"],
         risk_pct=raw["risk_pct"],
         daily_loss_limit_pct=raw.get("daily_loss_limit_pct"),
+        breakeven_after_tp1=raw.get("breakeven_after_tp1", False),
     )
 
 
@@ -208,6 +211,8 @@ def run_backtest(
         if pos.side < 0:
             pos.spread_cost_usd += spread[j] * pos.tp1_oz
         pos.tp1_filled = True
+        if risk.breakeven_after_tp1:
+            pos.sl = pos.entry_price
 
     def open_position(j: int, order: PendingOrder, price: float, slippage: float) -> None:
         nonlocal pos

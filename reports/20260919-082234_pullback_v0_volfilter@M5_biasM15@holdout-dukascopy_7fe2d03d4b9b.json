@@ -1,0 +1,75 @@
+{
+  "run_id": "20260919-082234_pullback_v0_volfilter@M5_biasM15@holdout-dukascopy_7fe2d03d4b9b",
+  "strategy": "pullback_v0_volfilter@M5/biasM15@holdout-dukascopy",
+  "params": {
+    "swing_len_h1": 5,
+    "swing_len_m5": 3,
+    "order_expiry": 36,
+    "sl_buffer_atr": 0.1,
+    "tp1_max_r": 2.0,
+    "session_start_hour": 7,
+    "session_end_hour": 16,
+    "min_sl_distance": 3.0,
+    "min_room_r": 1.0,
+    "atr_period": 14,
+    "vol_filter": true
+  },
+  "data": {
+    "source": "dukascopy",
+    "from": "2026-05-01 00:00:00",
+    "to": "2026-09-16 23:55:00",
+    "bars": 27168
+  },
+  "summary": {
+    "initial_equity": 50.0,
+    "final_equity": 50.0,
+    "return_pct": 0.0,
+    "n_trades": 0,
+    "skipped_signals": {},
+    "warnings": [
+      "no trades"
+    ]
+  },
+  "extra": {
+    "random_baseline": {
+      "runs": 50,
+      "expectancy_r": {
+        "strategy": null,
+        "random_median": null,
+        "random_p05": null,
+        "random_p95": null,
+        "share_random_at_least_as_good": null
+      },
+      "profit_factor": {
+        "strategy": null,
+        "random_median": null,
+        "random_p05": null,
+        "random_p95": null,
+        "share_random_at_least_as_good": null
+      },
+      "win_rate": {
+        "strategy": null,
+        "random_median": null,
+        "random_p05": null,
+        "random_p95": null,
+        "share_random_at_least_as_good": null
+      },
+      "return_pct": {
+        "strategy": 0.0,
+        "random_median": 0.0,
+        "random_p05": 0.0,
+        "random_p95": 0.0,
+        "share_random_at_least_as_good": 1.0
+      },
+      "random_n_trades_median": 0.0
+    },
+    "verdict": {
+      "passed": false,
+      "checks": {
+        "at_least_one_trade": false,
+        "expectancy_positive": false,
+        "not_below_random_median": false
+      }
+    }
+  }
+}

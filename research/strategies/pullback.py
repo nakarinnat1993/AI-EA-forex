@@ -40,6 +40,8 @@ class PullbackParams:
     min_sl_distance: float = 3.0
     min_room_r: float = 1.0
     atr_period: int = 14
+    # รอบ 3 (STRATEGY-ROUND3.md): เทรดเฉพาะเมื่อ ATR/ราคา บน timeframe เทรนด์ > median 365 วัน
+    vol_filter: bool = False
 
     def as_dict(self) -> dict:
         return {f.name: getattr(self, f.name) for f in fields(self)}
@@ -64,6 +66,7 @@ def generate_signals(
     swing_low = swings["swing_low"].to_numpy(float)
     swing_high = swings["swing_high"].to_numpy(float)
     atr = average_true_range(m5, params.atr_period)
+    active = high_volatility(m5.index, h1, params.atr_period) if params.vol_filter else np.ones(n, dtype=bool)
 
     side = np.zeros(n, dtype=np.int64)
     entry = np.full(n, np.nan)
@@ -78,7 +81,7 @@ def generate_signals(
         if not (in_session[j] and is_break[j]):
             continue
         direction = int(trend[j])
-        if bias[j] != direction:
+        if bias[j] != direction or not active[j]:
             continue
         level = broken[j]
         structure_edge = swing_low[j] if direction == 1 else swing_high[j]
@@ -140,6 +143,19 @@ def _levels(level, structure_edge, atr_now, close_now, direction, zones, decided
         tp1 = tp1_cap
     tp2 = level + 2 * (tp1 - level)
     return {"sl": sl, "tp1": tp1, "tp2": tp2, "zone": zone}
+
+
+def high_volatility(index: pd.DatetimeIndex, htf: pd.DataFrame, atr_period: int) -> np.ndarray:
+    """True เมื่อ ATR/ราคา ของ timeframe ใหญ่ สูงกว่า median ย้อนหลัง 365 วัน (ใช้แท่งที่ปิดแล้วเท่านั้น)
+    ปีแรกของข้อมูลยังมีประวัติไม่ครบ 365 วัน → False"""
+    ratio = pd.Series(average_true_range(htf, atr_period) / htf["close"].to_numpy(float), index=htf.index)
+    median = ratio.rolling("365D").median()
+    full_year = htf.index - htf.index[0] >= pd.Timedelta(days=365)
+    high = ((ratio > median) & full_year).to_numpy()
+    available = pd.DataFrame({"at": htf.index + bar_duration(htf.index), "high": high})
+    decisions = pd.DataFrame({"at": index + bar_duration(index)})
+    merged = pd.merge_asof(decisions, available, on="at", direction="backward")
+    return merged["high"].eq(True).to_numpy()
 
 
 def _h1_zones(h1: pd.DataFrame, swing_len: int, kind: str) -> tuple[np.ndarray, np.ndarray]:

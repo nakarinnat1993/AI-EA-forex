@@ -26,11 +26,19 @@
 **ทดสอบกลยุทธ์ครบแล้ว (2026-09-18): ไม่มีตัวไหนผ่าน** — 13 trial บนข้อมูล Dukascopy 2017 → 2026-04
 (SMC กลับตัว 4 แบบ, Asian breakout, trend pullback เทรนด์ H1 และ M15)
 ใกล้ที่สุด: pullback เทรนด์ M15 เข้า M5 (+0.20R ชนะการสุ่มทุกรอบ) แต่กำไร 94% มาจากปี 2025 และไม่มีไม้
-4 ปี → ไม่ผ่านเกณฑ์ความสม่ำเสมอ (IT-009)
+4 ปี → ไม่ผ่านเกณฑ์ความสม่ำเสมอ (IT-009) / รอบ 3 (FVG, pullback+ตัวกรอง) ตกข้อเดียวกัน (IT-011, 012)
+**holdout ถูกเปิดแล้ว 2026-09-19 (ผู้ใช้เลือก) ผล 0 ไม้ = ไม่ผ่าน** (IT-013) — ไม่มีข้อมูลทดสอบที่ยังไม่เคยเห็นเหลือ
+การยืนยันกลยุทธ์ใหม่ต้องใช้ข้อมูลหลัง 2026-09-16 เท่านั้น
 **ยังไม่มี EA ที่ควรรันด้วยเงินจริง** holdout ยังไม่ถูกเปิด ดู `journal/ITERATIONS.md` และ DECISIONS 2026-09-18
 
 ข้อมูล Dukascopy: `.venv/bin/python -m research.data.dukascopy 2017-01-01 <วันที่>` (M5/M15/H1, cache ใน data/dukascopy/raw)
 pandas 3: คอลัมน์ข้อความเก็บค่าว่างเป็น NaN — ใช้ `structure["is_break"]` ห้ามเช็ค `event is not None`
+
+**ขั้นปัจจุบัน: forward test บน demo เริ่มแล้ว 2026-09-22** — `ea/experts/ForwardTestEA.mq5` รัน 3 ค่าตั้ง
+(pullback M5/M15 magic 260921, pullback M1/M15 magic 260922, fvg M15/H1 magic 260923)
+บน demo 416358379 @ Exness-MT5Trial14 แผนและเกณฑ์: `journal/FORWARD-TEST-PLAN.md` ทบทวน 2026-12-22
+parity กับ Python ผ่านแล้ว (99.5–100%) ตัวเทียบ: `research/experiments/ea_parity.py`
+**ระหว่างรัน: รายงานอย่างเดียว ห้ามแก้กฎหรือพารามิเตอร์**
 
 รันการทดลอง: `.venv/bin/python -m research.experiments.compare_random --strategy smc_v0.1 --source dukascopy`
 (กลยุทธ์ที่มี: `smc_v0.1`, `asian_breakout_v0` / แหล่งข้อมูล: `dukascopy` 2017 →, `exness` 17 เดือน)

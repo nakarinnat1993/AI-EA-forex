@@ -1,0 +1,407 @@
+{
+  "run_id": "20260919-081313_pullback_v0_volfilter@M5_biasM15_7fe2d03d4b9b",
+  "strategy": "pullback_v0_volfilter@M5/biasM15",
+  "params": {
+    "swing_len_h1": 5,
+    "swing_len_m5": 3,
+    "order_expiry": 36,
+    "sl_buffer_atr": 0.1,
+    "tp1_max_r": 2.0,
+    "session_start_hour": 7,
+    "session_end_hour": 16,
+    "min_sl_distance": 3.0,
+    "min_room_r": 1.0,
+    "atr_period": 14,
+    "vol_filter": true
+  },
+  "data": {
+    "source": "dukascopy",
+    "timeframe": "M5",
+    "from": "2017-01-02 23:00:00",
+    "to": "2026-04-30 23:55:00",
+    "bars": 661035
+  },
+  "summary": {
+    "initial_equity": 50.0,
+    "final_equity": 65.25163242857228,
+    "return_pct": 30.503264857144565,
+    "n_trades": 116,
+    "skipped_signals": {
+      "order_expired": 3,
+      "news_blackout": 25,
+      "position_open": 57,
+      "missed_move": 13,
+      "order_already_pending": 3,
+      "too_small_to_split": 2
+    },
+    "warnings": [],
+    "win_rate": 0.45689655172413796,
+    "profit_factor": 1.5123848471723063,
+    "expectancy_usd": 0.1314795899014852,
+    "expectancy_r": 0.2610739299869854,
+    "avg_win_r": 1.6236372774156695,
+    "avg_loss_r": -0.8852095210244476,
+    "total_pnl_usd": 15.251632428572284,
+    "max_drawdown_pct": -12.376872610352708,
+    "sharpe_daily_annualized": 0.563078693055651,
+    "avg_hold_minutes": 442.88793103448273,
+    "trades_per_active_day": 1.1372549019607843,
+    "ambiguous_exits": 0,
+    "costs_usd": {
+      "spread": 1.4480000000000004,
+      "slippage_and_gaps": 0.47679999999993555,
+      "swap": -0.5443900000000003,
+      "commission": 0.0
+    },
+    "by_side": {
+      "long": {
+        "n": 81,
+        "pnl_usd": 12.43931300000056,
+        "win_rate": 0.4691358024691358,
+        "expectancy_r": 0.2969392304763315
+      },
+      "short": {
+        "n": 35,
+        "pnl_usd": 2.8123194285717203,
+        "win_rate": 0.42857142857142855,
+        "expectancy_r": 0.1780713774259275
+      }
+    },
+    "by_exit_reason": {
+      "news_close": {
+        "n": 35,
+        "pnl_usd": 11.962197928571658,
+        "win_rate": 0.7428571428571429,
+        "expectancy_r": 0.6699571981993662
+      },
+      "sl": {
+        "n": 59,
+        "pnl_usd": -27.35248985714262,
+        "win_rate": 0.0847457627118644,
+        "expectancy_r": -0.8679089494807423
+      },
+      "tp2": {
+        "n": 22,
+        "pnl_usd": 30.64192435714325,
+        "win_rate": 1.0,
+        "expectancy_r": 2.638304634585286
+      }
+    },
+    "by_year": {
+      "2019": {
+        "n": 5,
+        "pnl_usd": 0.22757521428580507,
+        "win_rate": 0.4,
+        "expectancy_r": 0.14234139767990778
+      },
+      "2020": {
+        "n": 23,
+        "pnl_usd": 5.039936357142956,
+        "win_rate": 0.5652173913043478,
+        "expectancy_r": 0.4459369199200021
+      },
+      "2024": {
+        "n": 32,
+        "pnl_usd": -3.9693736428567887,
+        "win_rate": 0.3125,
+        "expectancy_r": -0.259613986349783
+      },
+      "2025": {
+        "n": 43,
+        "pnl_usd": 14.145054500000334,
+        "win_rate": 0.5348837209302325,
+        "expectancy_r": 0.6375051070766368
+      },
+      "2026": {
+        "n": 13,
+        "pnl_usd": -0.19156000000002305,
+        "win_rate": 0.38461538461538464,
+        "expectancy_r": 0.016249822371414993
+      }
+    },
+    "by_month": {
+      "2019-06": {
+        "n": 1,
+        "pnl_usd": -0.49804857142853737,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0268014396201621
+      },
+      "2019-07": {
+        "n": 1,
+        "pnl_usd": -0.5003412142856769,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0266753552109125
+      },
+      "2019-08": {
+        "n": 3,
+        "pnl_usd": 1.2259650000000193,
+        "win_rate": 0.6666666666666666,
+        "expectancy_r": 0.9217279277435377
+      },
+      "2020-01": {
+        "n": 2,
+        "pnl_usd": 0.2118421428571583,
+        "win_rate": 0.5,
+        "expectancy_r": 0.22474686684694278
+      },
+      "2020-02": {
+        "n": 6,
+        "pnl_usd": 0.751965285714293,
+        "win_rate": 0.5,
+        "expectancy_r": 0.23266784620806133
+      },
+      "2020-04": {
+        "n": 1,
+        "pnl_usd": 0.23841228571428477,
+        "win_rate": 1.0,
+        "expectancy_r": 0.4917495930781517
+      },
+      "2020-05": {
+        "n": 1,
+        "pnl_usd": 1.5010719999999491,
+        "win_rate": 1.0,
+        "expectancy_r": 3.1111111111111107
+      },
+      "2020-06": {
+        "n": 1,
+        "pnl_usd": -0.5298914285713908,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0311349812633859
+      },
+      "2020-07": {
+        "n": 6,
+        "pnl_usd": 0.29914778571432177,
+        "win_rate": 0.5,
+        "expectancy_r": 0.12265251054680897
+      },
+      "2020-08": {
+        "n": 3,
+        "pnl_usd": 1.2006052857143208,
+        "win_rate": 0.6666666666666666,
+        "expectancy_r": 0.8074605882150397
+      },
+      "2020-09": {
+        "n": 2,
+        "pnl_usd": 0.2968032857143067,
+        "win_rate": 0.5,
+        "expectancy_r": 0.3135370634236436
+      },
+      "2020-11": {
+        "n": 1,
+        "pnl_usd": 1.069979714285712,
+        "win_rate": 1.0,
+        "expectancy_r": 2.053951669518659
+      },
+      "2024-03": {
+        "n": 4,
+        "pnl_usd": 0.9654287857142791,
+        "win_rate": 0.5,
+        "expectancy_r": 0.45791702750209173
+      },
+      "2024-04": {
+        "n": 12,
+        "pnl_usd": -2.515080142856993,
+        "win_rate": 0.25,
+        "expectancy_r": -0.45401575177527675
+      },
+      "2024-05": {
+        "n": 2,
+        "pnl_usd": 0.719241357142857,
+        "win_rate": 0.5,
+        "expectancy_r": 0.7870537305436851
+      },
+      "2024-07": {
+        "n": 2,
+        "pnl_usd": -0.8756614999998783,
+        "win_rate": 0.0,
+        "expectancy_r": -0.8368890916135852
+      },
+      "2024-08": {
+        "n": 4,
+        "pnl_usd": -0.621198714285647,
+        "win_rate": 0.25,
+        "expectancy_r": -0.3203108817645295
+      },
+      "2024-09": {
+        "n": 5,
+        "pnl_usd": -0.7307638571428606,
+        "win_rate": 0.4,
+        "expectancy_r": -0.2954141127590145
+      },
+      "2024-10": {
+        "n": 2,
+        "pnl_usd": -0.39756885714285417,
+        "win_rate": 0.5,
+        "expectancy_r": -0.40664576926377316
+      },
+      "2024-11": {
+        "n": 1,
+        "pnl_usd": -0.5137707142856925,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0198503003775634
+      },
+      "2025-01": {
+        "n": 2,
+        "pnl_usd": 0.6198158571428714,
+        "win_rate": 0.5,
+        "expectancy_r": 0.5820803071596803
+      },
+      "2025-02": {
+        "n": 4,
+        "pnl_usd": 1.5314675000000533,
+        "win_rate": 0.5,
+        "expectancy_r": 0.7691578150635132
+      },
+      "2025-03": {
+        "n": 3,
+        "pnl_usd": 0.9760845714285957,
+        "win_rate": 0.6666666666666666,
+        "expectancy_r": 0.6424156332074001
+      },
+      "2025-04": {
+        "n": 5,
+        "pnl_usd": 3.264568571428713,
+        "win_rate": 0.6,
+        "expectancy_r": 1.3652837912982707
+      },
+      "2025-05": {
+        "n": 1,
+        "pnl_usd": 0.12039999999999963,
+        "win_rate": 1.0,
+        "expectancy_r": 0.2955823969249287
+      },
+      "2025-09": {
+        "n": 9,
+        "pnl_usd": 3.344047000000043,
+        "win_rate": 0.5555555555555556,
+        "expectancy_r": 0.7078407605430401
+      },
+      "2025-10": {
+        "n": 16,
+        "pnl_usd": 2.3469666428571303,
+        "win_rate": 0.4375,
+        "expectancy_r": 0.2655209971796681
+      },
+      "2025-12": {
+        "n": 3,
+        "pnl_usd": 1.9417043571429278,
+        "win_rate": 0.6666666666666666,
+        "expectancy_r": 1.1679255589738116
+      },
+      "2026-01": {
+        "n": 9,
+        "pnl_usd": 2.3112042142857754,
+        "win_rate": 0.5555555555555556,
+        "expectancy_r": 0.47129458909140354
+      },
+      "2026-02": {
+        "n": 2,
+        "pnl_usd": -1.2659707857142983,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0078907810303823
+      },
+      "2026-03": {
+        "n": 2,
+        "pnl_usd": -1.2367934285715,
+        "win_rate": 0.0,
+        "expectancy_r": -1.0073110244667358
+      }
+    }
+  },
+  "extra": {
+    "random_baseline": {
+      "runs": 50,
+      "expectancy_r": {
+        "strategy": 0.2610739299869854,
+        "random_median": -0.03101468414661395,
+        "random_p05": -0.20561842404031141,
+        "random_p95": 0.0782874929932877,
+        "share_random_at_least_as_good": 0.0
+      },
+      "profit_factor": {
+        "strategy": 1.5123848471723063,
+        "random_median": 0.9141753028323358,
+        "random_p05": 0.557841155463271,
+        "random_p95": 1.1834206917016845,
+        "share_random_at_least_as_good": 0.0
+      },
+      "win_rate": {
+        "strategy": 0.45689655172413796,
+        "random_median": 0.43726851851851856,
+        "random_p05": 0.3565771997786386,
+        "random_p95": 0.49653846153846154,
+        "share_random_at_least_as_good": 0.32
+      },
+      "return_pct": {
+        "strategy": 30.503264857144565,
+        "random_median": -4.515661571428076,
+        "random_p05": -23.358210535714097,
+        "random_p95": 9.313801049999967,
+        "share_random_at_least_as_good": 0.0
+      },
+      "random_n_trades_median": 133.0
+    },
+    "yearly_folds": [
+      {
+        "year": 2019,
+        "n": 5,
+        "expectancy_r": 0.14234139767990778,
+        "win_rate": 0.4,
+        "pnl_usd": 0.22757521428580507
+      },
+      {
+        "year": 2020,
+        "n": 23,
+        "expectancy_r": 0.4459369199200021,
+        "win_rate": 0.5652173913043478,
+        "pnl_usd": 5.039936357142956
+      },
+      {
+        "year": 2024,
+        "n": 32,
+        "expectancy_r": -0.259613986349783,
+        "win_rate": 0.3125,
+        "pnl_usd": -3.9693736428567887
+      },
+      {
+        "year": 2025,
+        "n": 43,
+        "expectancy_r": 0.6375051070766368,
+        "win_rate": 0.5348837209302325,
+        "pnl_usd": 14.145054500000334
+      },
+      {
+        "year": 2026,
+        "n": 13,
+        "expectancy_r": 0.016249822371414993,
+        "win_rate": 0.38461538461538464,
+        "pnl_usd": -0.19156000000002305
+      }
+    ],
+    "setup_funnel": {
+      "no_room": 3962,
+      "sl_too_tight": 1381,
+      "signal": 217,
+      "sl_on_wrong_side": 2
+    },
+    "verdict": {
+      "passed": false,
+      "checks": {
+        "trades_at_least_100": true,
+        "expectancy_positive": true,
+        "beats_random": true,
+        "positive_in_60pct_of_years": true,
+        "no_year_over_50pct_of_profit": false,
+        "drawdown_within_25pct": true
+      },
+      "values": {
+        "n_trades": 116,
+        "expectancy_r": 0.2610739299869854,
+        "random_share": 0.0,
+        "positive_year_share": 0.75,
+        "best_year_profit_share": 0.9274452794640595,
+        "max_drawdown_pct": 12.376872610352708
+      }
+    }
+  }
+}

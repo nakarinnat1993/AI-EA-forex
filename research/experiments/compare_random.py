@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -56,6 +57,7 @@ def main() -> None:
     parser.add_argument("--source", choices=sorted(DATA_FILES), default="dukascopy")
     parser.add_argument("--timeframe", default="M5", help="timeframe ที่ใช้เข้าไม้")
     parser.add_argument("--bias-tf", default="H1", help="timeframe ที่ใช้ดูเทรนด์")
+    parser.add_argument("--breakeven", action="store_true", help="เลื่อน SL มาที่ราคาเข้าหลัง TP1")
     args = parser.parse_args()
     files = DATA_FILES[args.source]
     for tf in (args.timeframe, args.bias_tf):
@@ -69,12 +71,16 @@ def main() -> None:
         label = args.strategy
     else:
         label = f"{args.strategy}@{args.timeframe}" + (f"/bias{args.bias_tf}" if args.bias_tf != "H1" else "")
+    if args.breakeven:
+        label += "+be"
 
     m5_path, h1_path = files[args.timeframe], files[args.bias_tf]
     m5 = load_research_bars(m5_path)
     h1 = load_research_bars(h1_path)
     spec, costs = load_cost_config(CONFIG / "costs_exness_xauusdc.json")
     risk = load_risk_config(CONFIG / "risk.json")
+    if args.breakeven:
+        risk = replace(risk, breakeven_after_tp1=True)
     blackout = blackout_for_bars(m5.index, CALENDAR)
     print(f"{label} | source={args.source} | dev: {m5.index[0]} → {m5.index[-1]}  ({len(m5):,} แท่ง {args.timeframe})", flush=True)
 
